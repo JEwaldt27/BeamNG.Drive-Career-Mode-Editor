@@ -8,7 +8,8 @@ namespace BeamNG.Drive_Career_Editor
     public partial class EditSaveForm : Form
     {
         private string jsonFilePath = string.Empty; // Initialize to an empty string
-        private int targetLineIndex = 135; // Line 136 in 0-based index
+        private int moneyLineIndex = 135; // Line 136 in 0-based index
+        private int bonusStarsLineIndex = 45; // Line 46 in 0-based index
 
         public EditSaveForm()
         {
@@ -62,18 +63,32 @@ namespace BeamNG.Drive_Career_Editor
                             try
                             {
                                 string[] lines = File.ReadAllLines(jsonFilePath);
-                                if (lines.Length > targetLineIndex)
+                                if (lines.Length > moneyLineIndex && lines.Length > bonusStarsLineIndex)
                                 {
-                                    string line = lines[targetLineIndex]; // Line 136 in 0-based index
-                                    string valueString = ExtractValue(line);
+                                    // Read and set Money value
+                                    string moneyLine = lines[moneyLineIndex];
+                                    string moneyValueString = ExtractValue(moneyLine);
 
-                                    if (float.TryParse(valueString, out float value))
+                                    if (float.TryParse(moneyValueString, out float moneyValue))
                                     {
-                                        txtMoney.Text = value.ToString();
+                                        txtMoney.Text = moneyValue.ToString();
                                     }
                                     else
                                     {
-                                        MessageBox.Show("Unable to parse the value from the JSON file.");
+                                        MessageBox.Show("Unable to parse the money value from the JSON file.");
+                                    }
+
+                                    // Read and set Bonus Stars value
+                                    string bonusStarsLine = lines[bonusStarsLineIndex];
+                                    string bonusStarsValueString = ExtractValue(bonusStarsLine);
+
+                                    if (float.TryParse(bonusStarsValueString, out float bonusStarsValue))
+                                    {
+                                        txtBonusStars.Text = bonusStarsValue.ToString();
+                                    }
+                                    else
+                                    {
+                                        MessageBox.Show("Unable to parse the bonus stars value from the JSON file.");
                                     }
                                 }
                                 else
@@ -117,16 +132,19 @@ namespace BeamNG.Drive_Career_Editor
 
         private void btnSave_Click(object sender, EventArgs e)
         {
-            if (float.TryParse(txtMoney.Text, out float newValue))
+            if (float.TryParse(txtMoney.Text, out float newMoneyValue) && float.TryParse(txtBonusStars.Text, out float newBonusStarsValue))
             {
                 try
                 {
                     string[] lines = File.ReadAllLines(jsonFilePath);
-                    if (lines.Length > targetLineIndex)
+                    if (lines.Length > moneyLineIndex && lines.Length > bonusStarsLineIndex)
                     {
-                        lines[targetLineIndex] = $"\"value\": {newValue},";
+                        // Update Money value
+                        lines[moneyLineIndex] = $"\"value\": {newMoneyValue}";
+                        // Update Bonus Stars value
+                        lines[bonusStarsLineIndex] = $"\"value\": {newBonusStarsValue}";
                         File.WriteAllLines(jsonFilePath, lines);
-                        MessageBox.Show("Value updated successfully.");
+                        MessageBox.Show("Values updated successfully.");
                     }
                     else
                     {
@@ -140,7 +158,7 @@ namespace BeamNG.Drive_Career_Editor
             }
             else
             {
-                MessageBox.Show("Invalid value. Please enter a valid number.");
+                MessageBox.Show("Invalid values. Please enter valid numbers.");
             }
         }
     }
